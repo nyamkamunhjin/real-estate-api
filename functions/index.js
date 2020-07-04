@@ -21,14 +21,15 @@ app.get('/', (req, res) => {
 
 // create
 // post
-app.post('/api/create', (req, res) => {
+app.post('/api/add', (req, res) => {
   db.collection('properties')
-    .add({ ...req.body }, { merge: true })
+    .add(req.body, { merge: true })
     .then((data) => {
       console.log(data);
-      res.status(200).json({ successful: true });
+      return res.status(200).json({ successful: true });
     })
     .catch((err) => {
+      console.log(err);
       return res.status(500).json({ errorText: `couldn't add data to server` });
     });
 });
@@ -40,13 +41,19 @@ app.get('/api/properties', (req, res) => {
     .get()
     .then((snap) => {
       let docs = snap.docs;
-      let datas = docs.map((doc) => doc.data());
-      console.log(datas);
-      res.status(200).json(datas);
+      // console.log(docs);
+      let datas = docs.map((doc) => {
+        return {
+          id: doc.id,
+          ...doc.data()
+        }
+      });
+      // console.log(datas);
+      return res.status(200).json(datas);
     })
     .catch((err) => {
       console.log(err);
-      res.status(500).send(error);
+      return res.status(500).send(error);
     });
 });
 
@@ -56,16 +63,18 @@ app.get('/api/properties/:id', (req, res) => {
     .get()
     .then((doc) => {
       if (!doc.exists) {
-        console.log('No document found.');
-        throw new Error();
+        throw new Error('No document found.');
       } else {
-        console.log(doc.data());
-        res.status(200).json(doc.data());
+        let data = {
+          id: doc.id,
+          ...doc.data()
+        }
+        return res.status(200).json(data);
       }
     })
     .catch((err) => {
       console.log(err);
-      res.status(500).json(err);
+      return res.status(500).json({ successful: false });
     });
 });
 
@@ -74,14 +83,14 @@ app.get('/api/properties/:id', (req, res) => {
 app.put('/api/update/:id', (req, res) => {
   db.collection('properties')
     .doc(req.params.id)
-    .update({ ...req.body })
+    .update(req.body)
     .then((result) => {
       console.log(result);
-      res.status(200).json({ successful: true });
+      return res.status(200).json({ successful: true });
     })
     .catch((err) => {
       console.log(err);
-      res.status(500).json({ successful: false });
+      return res.status(500).json({ successful: false });
     });
 });
 
@@ -92,11 +101,11 @@ app.delete('/api/delete/:id', (req, res) => {
     .delete()
     .then((result) => {
       console.log(result);
-      res.status(200).json({ successful: true });
+      return res.status(200).json({ successful: true });
     })
     .catch((err) => {
       console.log(err);
-      res.status(500).json({ successful: false });
+      return res.status(500).json({ successful: false });
     });
 });
 
