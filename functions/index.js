@@ -1,112 +1,33 @@
 const functions = require('firebase-functions');
-const admin = require('firebase-admin');
-const serviceAccount = require('./api_key.json');
-
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-  databaseURL: 'https://real-estate-281401.firebaseio.com',
-});
 
 const express = require('express');
 const cors = require('cors');
+const passport = require('passport');
+const authRoutes = require('./router/auth-routes');
+const apiRoutes = require('./router/api-routes');
+const session = require('express-session');
+const db = require('./firebase/firebase').firestore()
+const keys = require('./keys');
+const cookieSession = require('cookie-session');
+
+require('./GooglePassport.js');
 
 const app = express();
-const db = admin.firestore();
 
+app.use(cookieSession({
+  maxAge: 60 * 1000,
+  keys: [keys.session.cookieKey]
+}));
+
+// initialize session
 app.use(cors({ origin: true }));
-// routes
+app.use(passport.initialize());
+app.use(passport.session());
+app.use('/auth', authRoutes);
+app.use('/api', apiRoutes);
+
 app.get('/', (req, res) => {
   return res.status(200).json({ text: 'hello world' });
-});
-
-// create
-// post
-app.post('/api/add', (req, res) => {
-  db.collection('properties')
-    .add(req.body, { merge: true })
-    .then((data) => {
-      console.log(data);
-      return res.status(200).json({ successful: true });
-    })
-    .catch((err) => {
-      console.log(err);
-      return res.status(500).json({ errorText: `couldn't add data to server` });
-    });
-});
-
-// read
-// get
-app.get('/api/properties', (req, res) => {
-  db.collection('properties')
-    .get()
-    .then((snap) => {
-      let docs = snap.docs;
-      // console.log(docs);
-      let datas = docs.map((doc) => {
-        return {
-          id: doc.id,
-          ...doc.data()
-        }
-      });
-      // console.log(datas);
-      return res.status(200).json(datas);
-    })
-    .catch((err) => {
-      console.log(err);
-      return res.status(500).send(error);
-    });
-});
-
-app.get('/api/properties/:id', (req, res) => {
-  db.collection('properties')
-    .doc(req.params.id)
-    .get()
-    .then((doc) => {
-      if (!doc.exists) {
-        throw new Error('No document found.');
-      } else {
-        let data = {
-          id: doc.id,
-          ...doc.data()
-        }
-        return res.status(200).json(data);
-      }
-    })
-    .catch((err) => {
-      console.log(err);
-      return res.status(500).json({ successful: false });
-    });
-});
-
-// update
-// put
-app.put('/api/update/:id', (req, res) => {
-  db.collection('properties')
-    .doc(req.params.id)
-    .update(req.body)
-    .then((result) => {
-      console.log(result);
-      return res.status(200).json({ successful: true });
-    })
-    .catch((err) => {
-      console.log(err);
-      return res.status(500).json({ successful: false });
-    });
-});
-
-// delete
-app.delete('/api/delete/:id', (req, res) => {
-  db.collection('properties')
-    .doc(req.params.id)
-    .delete()
-    .then((result) => {
-      console.log(result);
-      return res.status(200).json({ successful: true });
-    })
-    .catch((err) => {
-      console.log(err);
-      return res.status(500).json({ successful: false });
-    });
 });
 
 exports.app = functions.https.onRequest(app);
