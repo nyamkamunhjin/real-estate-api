@@ -18,7 +18,7 @@ router.post('/add', authCheck, (req, res) => {
 
 // read
 // get
-router.get('/properties', (req, res) => {
+router.get('/properties', authCheck, (req, res) => {
 
   db.collection('properties')
     .get()

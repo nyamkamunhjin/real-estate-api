@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const passport = require('passport');
-
+const keys = require('../keys');
 router.get(
   '/google',
   passport.authenticate('google', {
@@ -10,7 +10,7 @@ router.get(
 
 router.get('/google/redirect', passport.authenticate('google'), (req, res) => {
   console.log(req.user);
-  res.json(req.user);
+  res.redirect(keys.url.front_end);
 });
 
 router.get('/google/success', (req, res) => {
