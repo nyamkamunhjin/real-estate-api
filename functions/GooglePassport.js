@@ -19,7 +19,7 @@ passport.use(
         .then((snapshot) => {
           // check if user exists
           if (!snapshot.empty) {
-            let user = snapshot.docs[0].data();
+            let user = { id: snapshot.docs[0].id, ...snapshot.docs[0].data() };
             console.log('user exists:', user);
             done(null, user);
           } else {
@@ -34,7 +34,8 @@ passport.use(
             db.collection('users')
               .add(user, { merge: true })
               .then((data) => {
-                console.log('new user created:', user);
+                console.log('new user created:', data);
+                user.id = data.id;
                 done(null, user);
               });
           }
@@ -45,10 +46,11 @@ passport.use(
 
 passport.serializeUser((user, done) => {
   console.log('serializer called: ', user.id);
-  done(null, user);
+  done(null, user.id);
 });
 
 passport.deserializeUser((id, done) => {
+  console.log(id);
   db.collection('users')
     .doc(id)
     .get()

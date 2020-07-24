@@ -63,7 +63,7 @@ router.get('/properties/:id', (req, res) => {
 
 // update
 // put
-router.put('/update/:id', (req, res) => {
+router.put('/update/:id', authCheck, (req, res) => {
   db.collection('properties')
     .doc(req.params.id)
     .update(req.body)
@@ -78,7 +78,7 @@ router.put('/update/:id', (req, res) => {
 });
 
 // delete
-router.delete('/delete/:id', (req, res) => {
+router.delete('/delete/:id', authCheck, (req, res) => {
   db.collection('properties')
     .doc(req.params.id)
     .delete()

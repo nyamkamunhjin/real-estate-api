@@ -15,7 +15,7 @@ require('./GooglePassport.js');
 const app = express();
 
 app.use(cookieSession({
-  maxAge: 60 * 1000,
+  maxAge: 20 * 1000,
   keys: [keys.session.cookieKey]
 }));
 
