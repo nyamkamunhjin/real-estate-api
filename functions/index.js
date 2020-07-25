@@ -5,24 +5,14 @@ const cors = require('cors');
 const passport = require('passport');
 const authRoutes = require('./router/auth-routes');
 const apiRoutes = require('./router/api-routes');
-const session = require('express-session');
-const db = require('./firebase/firebase').firestore()
-const keys = require('./keys');
-const cookieSession = require('cookie-session');
 
-require('./GooglePassport.js');
+require('./passport-setup.js');
 
 const app = express();
 
-app.use(cookieSession({
-  maxAge: 24 * 60 * 60 * 1000,
-  keys: [keys.session.cookieKey]
-}));
 
-// initialize session
 app.use(cors({ origin: true }));
 app.use(passport.initialize());
-app.use(passport.session());
 app.use('/auth', authRoutes);
 app.use('/api', apiRoutes);
 

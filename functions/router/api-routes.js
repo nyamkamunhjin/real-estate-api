@@ -1,9 +1,10 @@
 const router = require('express').Router();
-const db = require('../firebase/firebase').firestore()
+const db = require('../firebase/firebase').firestore();
 const authCheck = require('../auth-check');
+const passport = require('passport');
 // create
 // post
-router.post('/add', authCheck, (req, res) => {
+router.post('/add', passport.authenticate('jwt', { session: false }), (req, res) => {
   db.collection('properties')
     .add(req.body, { merge: true })
     .then((data) => {
@@ -18,27 +19,30 @@ router.post('/add', authCheck, (req, res) => {
 
 // read
 // get
-router.get('/properties', authCheck, (req, res) => {
-
-  db.collection('properties')
-    .get()
-    .then((snap) => {
-      let docs = snap.docs;
-      // console.log(docs);
-      let datas = docs.map((doc) => {
-        return {
-          id: doc.id,
-          ...doc.data(),
-        };
+router.get(
+  '/properties',
+  passport.authenticate('jwt', { session: false }),
+  (req, res) => {
+    db.collection('properties')
+      .get()
+      .then((snap) => {
+        let docs = snap.docs;
+        // console.log(docs);
+        let datas = docs.map((doc) => {
+          return {
+            id: doc.id,
+            ...doc.data(),
+          };
+        });
+        // console.log(datas);
+        return res.status(200).json(datas);
+      })
+      .catch((err) => {
+        console.log(err);
+        return res.status(500).send(error);
       });
-      // console.log(datas);
-      return res.status(200).json(datas);
-    })
-    .catch((err) => {
-      console.log(err);
-      return res.status(500).send(error);
-    });
-});
+  }
+);
 
 router.get('/properties/:id', (req, res) => {
   db.collection('properties')
@@ -91,6 +95,5 @@ router.delete('/delete/:id', authCheck, (req, res) => {
       return res.status(500).json({ successful: false });
     });
 });
-
 
 module.exports = router;

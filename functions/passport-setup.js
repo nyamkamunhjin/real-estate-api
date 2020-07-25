@@ -1,7 +1,11 @@
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const oAuthKeys = require('./oAuth_keys.json');
+const keys = require('./keys');
 const db = require('./firebase/firebase').firestore();
+
+const JWTstrategy = require('passport-jwt').Strategy;
+const ExtractJWT = require('passport-jwt').ExtractJwt;
 
 passport.use(
   new GoogleStrategy(
@@ -59,3 +63,19 @@ passport.deserializeUser((id, done) => {
       done(null, user);
     });
 });
+
+passport.use(
+  new JWTstrategy(
+    {
+      secretOrKey: keys.jwt.secretKey,
+      jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
+    },
+    async (token, done) => {
+      try {
+        return done(null, token.user);
+      } catch (error) {
+        done(error);
+      }
+    }
+  )
+);
