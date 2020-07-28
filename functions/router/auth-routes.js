@@ -2,6 +2,8 @@ const router = require('express').Router();
 const jwt = require('jsonwebtoken');
 const passport = require('passport');
 const keys = require('../keys');
+const url = require('url');
+
 router.get(
   '/google',
   passport.authenticate('google', {
@@ -17,9 +19,25 @@ router.get('/google/redirect', passport.authenticate('google'), (req, res) => {
     email: req.user.email,
   };
 
-  const token = jwt.sign({ user: user }, keys.jwt.secretKey, { expiresIn: '60s'});
+  // calc expire date
+  let expiresIn = new Date();
+  // expiresIn.setHours(expiresIn.getHours() + 1);
+  const addedSeconds = 60;
+  expiresIn.setSeconds(expiresIn.getSeconds() + addedSeconds);
 
-  return res.json({ token });
+  const token = jwt.sign({ user }, keys.jwt.secretKey, { expiresIn: addedSeconds });
+
+  // return res.json({ token, userId: user.id, expires: expiresIn.toISOString });
+  res.redirect(
+    url.format({
+      pathname: keys.url.front_end + '/auth',
+      query: {
+        token,
+        userId: user.id,
+        expires: expiresIn.toISOString(),
+      },
+    })
+  );
 });
 
 router.get('/google/success', (req, res) => {

@@ -1,21 +1,26 @@
 const router = require('express').Router();
 const db = require('../firebase/firebase').firestore();
-const authCheck = require('../auth-check');
 const passport = require('passport');
 // create
 // post
-router.post('/add', passport.authenticate('jwt', { session: false }), (req, res) => {
-  db.collection('properties')
-    .add(req.body, { merge: true })
-    .then((data) => {
-      console.log(data);
-      return res.status(200).json({ successful: true });
-    })
-    .catch((err) => {
-      console.log(err);
-      return res.status(500).json({ errorText: `couldn't add data to server` });
-    });
-});
+router.post(
+  '/add',
+  passport.authenticate('jwt', { session: false }),
+  (req, res) => {
+    db.collection('properties')
+      .add(req.body, { merge: true })
+      .then((data) => {
+        console.log(data);
+        return res.status(200).json({ successful: true });
+      })
+      .catch((err) => {
+        console.log(err);
+        return res
+          .status(500)
+          .json({ errorText: `couldn't add data to server` });
+      });
+  }
+);
 
 // read
 // get
@@ -67,7 +72,7 @@ router.get('/properties/:id', (req, res) => {
 
 // update
 // put
-router.put('/update/:id', authCheck, (req, res) => {
+router.put('/update/:id', (req, res) => {
   db.collection('properties')
     .doc(req.params.id)
     .update(req.body)
@@ -82,7 +87,7 @@ router.put('/update/:id', authCheck, (req, res) => {
 });
 
 // delete
-router.delete('/delete/:id', authCheck, (req, res) => {
+router.delete('/delete/:id', (req, res) => {
   db.collection('properties')
     .doc(req.params.id)
     .delete()

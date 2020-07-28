@@ -3,6 +3,6 @@ module.exports = {
     secretKey: 'fwjqpqjwjfqwpofjwqop'
   },
   url: {
-    front_end: 'http://localhost:3000/'
+    front_end: 'http://localhost:3000'
   }
 }
