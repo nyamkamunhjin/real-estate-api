@@ -10,7 +10,7 @@ const ExtractJWT = require('passport-jwt').ExtractJwt;
 
 passport.use(
   new LocalStrategy((username, password, done) => {
-    console.log(username, password);
+    // console.log(username, password);
 
     db.collection('users')
       .where('username', '==', username)
@@ -24,20 +24,21 @@ passport.use(
         // user is found
         // now check password
         const user = snapshot.docs[0].data();
-        // if (bcrypt.compare(password, user.password)) {
-        //   return done(null, user);
-        // } else {
-        //   return done(null, false, { message: 'Incorrect password.' });
-        // }
-        if (password === user.password) {
-          
-          console.log(typeof(password), typeof(user.password), password, user.password, user.password === password);
-
+        if (bcrypt.compare(password, user.password)) {
           return done(null, user);
         } else {
           console.log('Incorrect password.');
           return done(null, false, { message: 'Incorrect password.' });
         }
+        // if (password === user.password) {
+          
+        //   console.log(typeof(password), typeof(user.password), password, user.password, user.password === password);
+
+        //   return done(null, user);
+        // } else {
+        //   console.log('Incorrect password.');
+        //   return done(null, false, { message: 'Incorrect password.' });
+        // }
       });
   })
 );
