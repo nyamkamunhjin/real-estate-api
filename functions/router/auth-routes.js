@@ -27,7 +27,18 @@ router.post(
       expiresIn: addedSeconds,
     });
 
-    return res.json({ token, userId: user.id, expires: expiresIn.toISOString });
+    // return res.json({ token, userId: user.id, expires: expiresIn.toISOString });
+    return res.json({
+      url: url.format({
+        pathname: '/auth',
+        query: {
+          token,
+          userId: user.id,
+          expires: expiresIn.toISOString(),
+        },
+      }),
+    });
+
     res.redirect(
       url.format({
         pathname: keys.url.front_end + '/auth',
